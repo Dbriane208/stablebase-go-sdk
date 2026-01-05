@@ -1,0 +1,10 @@
+# Go
+/bin/
+*.exe
+*.test
+
+# VS Code
+.vscode/
+
+# Env
+.env
