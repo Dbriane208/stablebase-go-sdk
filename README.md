@@ -255,25 +255,6 @@ go test ./...
 go test -cover ./...
 ```
 
-### Commands
-
-```bash
-# Merchant: Register (one-time)
-make register-merchant PAYOUT=0x... METADATA="https://..." NETWORK=base-sepolia
-
-# Customer: Approve USDC
-make payer-approve AMOUNT=5000000 PAYER_KEY=$CUSTOMER_KEY NETWORK=base-sepolia
-
-# Customer: Create order
-make create-order MERCHANT_ID=0x... AMOUNT=5000000 PAYER_KEY=$CUSTOMER_KEY NETWORK=base-sepolia
-
-# Customer: Pay order
-make pay-order ORDER_ID=0x... PAYER_KEY=$CUSTOMER_KEY NETWORK=base-sepolia
-
-# Platform: Settle order
-make settle-order ORDER_ID=0x... NETWORK=base-sepolia
-```
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -290,6 +271,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Resources
 
-- [SDK Architecture](SDK_ARCHITECTURE.md) - Detailed architecture documentation
 - [Base Sepolia Explorer](https://sepolia.basescan.org)
 - [Polygon Amoy Explorer](https://amoy.polygonscan.com)
