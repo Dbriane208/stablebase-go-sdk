@@ -7,6 +7,7 @@ import (
 
 	"github.com/Dbriane208/stablebase-go-sdk/client"
 	"github.com/Dbriane208/stablebase-go-sdk/contracts"
+	"github.com/Dbriane208/stablebase-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -22,6 +23,11 @@ func New(c *client.Client) *Platform {
 
 // SettleOrder distributes the order between the merchant and the platform
 func (p *Platform) SettleOrder(ctx context.Context, orderId [32]byte) (*contracts.PaymentProcessorOrderSettled, *types.Receipt, error) {
+	//Validate inputs
+	if err := utils.ValidateOrderId(orderId); err != nil {
+		return nil, nil, err
+	}
+
 	// Create transaction options
 	auth, err := bind.NewKeyedTransactorWithChainID(p.Client.PrivateKey, p.Client.ChainID)
 	if err != nil {
@@ -59,6 +65,11 @@ func (p *Platform) SettleOrder(ctx context.Context, orderId [32]byte) (*contract
 
 // RefundOrder allows platform and merchant to return order back to payer
 func (p *Platform) RefundOrder(ctx context.Context, orderId [32]byte) (*contracts.PaymentProcessorOrderRefunded, *types.Receipt, error) {
+	//Validate inputs
+	if err := utils.ValidateOrderId(orderId); err != nil {
+		return nil, nil, err
+	}
+
 	// Create transaction options
 	auth, err := bind.NewKeyedTransactorWithChainID(p.Client.PrivateKey, p.Client.ChainID)
 	if err != nil {
@@ -96,6 +107,11 @@ func (p *Platform) RefundOrder(ctx context.Context, orderId [32]byte) (*contract
 
 // EmergencyWithdraw allows platform admin to withdraw funds from the contract in emergency situations
 func (p *Platform) EmergencyWithdraw(ctx context.Context, tokenAddress common.Address, receiverAddress common.Address, amount *big.Int) (*contracts.PaymentProcessorEmergencyWithdrawalSuccess, *types.Receipt, error) {
+	// Validate inputs
+	if err := utils.ValidateEmergencyWithdrawInputs(tokenAddress, receiverAddress, amount); err != nil {
+		return nil, nil, err
+	}
+
 	// Create transaction opts
 	auth, err := bind.NewKeyedTransactorWithChainID(p.Client.PrivateKey, p.Client.ChainID)
 	if err != nil {
@@ -170,6 +186,11 @@ func (p *Platform) SetEmergencyWithdrawalEnabled(ctx context.Context, enable boo
 
 // UpdateMerchantRegistry updates the address of new deployed contract
 func (p *Platform) UpdateMerchantRegistry(ctx context.Context, newRegistryAddress common.Address) (*contracts.PaymentProcessorMerchantRegistryUpdated, *types.Receipt, error) {
+	// Validate inputs
+	if err := utils.ValidateUpdateMerchantRegistryInput(newRegistryAddress); err != nil {
+		return nil, nil, err
+	}
+
 	// Create transaction options
 	auth, err := bind.NewKeyedTransactorWithChainID(p.Client.PrivateKey, p.Client.ChainID)
 	if err != nil {
@@ -207,6 +228,11 @@ func (p *Platform) UpdateMerchantRegistry(ctx context.Context, newRegistryAddres
 
 // SetTokenSupport updates the status of a token (enable/disable support)
 func (p *Platform) SetTokenSupport(ctx context.Context, tokenAddress common.Address, status *big.Int) (*contracts.PaymentProcessorTokenSupportUpdated, *types.Receipt, error) {
+	// Validate Input
+	if err := utils.ValidateSetTokenSupportInput(tokenAddress, status); err != nil {
+		return nil, nil, err
+	}
+
 	// Create transaction options
 	auth, err := bind.NewKeyedTransactorWithChainID(p.Client.PrivateKey, p.Client.ChainID)
 	if err != nil {
@@ -318,6 +344,11 @@ func (p *Platform) UpdateOrderExpirationTime(ctx context.Context, newExpirationT
 
 // GetPlatformTokenBalance gets the platform's token balance for a specific token
 func (p *Platform) GetPlatformTokenBalance(ctx context.Context, platformWalletAddress common.Address, tokenAddress common.Address) (*big.Int, error) {
+	// Validate inputs
+	if err := utils.ValidateGetPlatformTokenBalanceInputs(platformWalletAddress, tokenAddress); err != nil {
+		return nil, err
+	}
+
 	// Create call options
 	opts := &bind.CallOpts{Context: ctx}
 
@@ -338,6 +369,11 @@ func (p *Platform) GetPlatformTokenBalance(ctx context.Context, platformWalletAd
 
 // GetContractTokenBalance gets the PaymentProcessor contract's token balance for a specific token
 func (p *Platform) GetContractTokenBalance(ctx context.Context, tokenAddress common.Address) (*big.Int, error) {
+	// Validate inputs
+	if err := utils.ValidateAddress(tokenAddress, "tokenAddress"); err != nil {
+		return nil, err
+	}
+
 	// Create call options
 	opts := &bind.CallOpts{Context: ctx}
 

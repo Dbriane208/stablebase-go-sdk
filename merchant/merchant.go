@@ -7,6 +7,7 @@ import (
 
 	"github.com/Dbriane208/stablebase-go-sdk/client"
 	"github.com/Dbriane208/stablebase-go-sdk/contracts"
+	"github.com/Dbriane208/stablebase-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -25,6 +26,11 @@ func New(c *client.Client) *Merchant {
 // RegisterMerchant registers a new merchant on the blockchain
 // Returns the merchantId and transaction receipt after confirmation
 func (m *Merchant) RegisterMerchant(ctx context.Context, payoutWallet common.Address, metadataURI string) (*contracts.MerchantRegistryMerchantRegistered, [32]byte, *types.Receipt, error) {
+	// Validate inputs
+	if err := utils.ValidateRegisterMerchantInputs(payoutWallet, metadataURI); err != nil {
+		return nil, [32]byte{}, nil, err
+	}
+
 	// Create transaction options
 	auth, err := bind.NewKeyedTransactorWithChainID(m.Client.PrivateKey, m.Client.ChainID)
 	if err != nil {
@@ -63,6 +69,11 @@ func (m *Merchant) RegisterMerchant(ctx context.Context, payoutWallet common.Add
 
 // UpdateMerchant updates a merchant on the blockchain
 func (m *Merchant) UpdateMerchant(ctx context.Context, merchantId [32]byte, payoutWallet common.Address, metadataURI string) (*contracts.MerchantRegistryMerchantUpdated, *types.Receipt, error) {
+	// Validate inputs
+	if err := utils.ValidateUpdateMerchantInputs(merchantId, payoutWallet, metadataURI); err != nil {
+		return nil, nil, err
+	}
+
 	// Create transaction options
 	auth, err := bind.NewKeyedTransactorWithChainID(m.Client.PrivateKey, m.Client.ChainID)
 	if err != nil {
@@ -100,6 +111,11 @@ func (m *Merchant) UpdateMerchant(ctx context.Context, merchantId [32]byte, payo
 
 // RefundOrder allows platform and merchant to return order back to payer
 func (m *Merchant) RefundOrder(ctx context.Context, orderId [32]byte) (*contracts.PaymentProcessorOrderRefunded, *types.Receipt, error) {
+	// Validate inputs
+	if err := utils.ValidateOrderId(orderId); err != nil {
+		return nil, nil, err
+	}
+
 	// Create transaction options
 	auth, err := bind.NewKeyedTransactorWithChainID(m.Client.PrivateKey, m.Client.ChainID)
 	if err != nil {
@@ -137,6 +153,11 @@ func (m *Merchant) RefundOrder(ctx context.Context, orderId [32]byte) (*contract
 
 // GetMerchantInfo retrieves merchant information from the blockchain
 func (m *Merchant) GetMerchantInfo(ctx context.Context, merchantId [32]byte) (*contracts.IMerchantRegistryMerchant, error) {
+	// Validate inputs
+	if err := utils.ValidateMerchantId(merchantId); err != nil {
+		return nil, err
+	}
+
 	// Create call options (read-only, no transaction)
 	opts := &bind.CallOpts{Context: ctx}
 
@@ -151,6 +172,11 @@ func (m *Merchant) GetMerchantInfo(ctx context.Context, merchantId [32]byte) (*c
 
 // IsMerchantVerified checks whether the merchant is verified from the blockchain
 func (m *Merchant) IsMerchantVerified(ctx context.Context, merchantId [32]byte) (bool, error) {
+	// Validate inputs
+	if err := utils.ValidateMerchantId(merchantId); err != nil {
+		return false, err
+	}
+
 	// Create call options
 	opts := &bind.CallOpts{Context: ctx}
 
@@ -165,6 +191,11 @@ func (m *Merchant) IsMerchantVerified(ctx context.Context, merchantId [32]byte) 
 
 // GetMerchantVerificationStatus retrieves merchant verification status from the blockchain
 func (m *Merchant) GetMerchantVerificationStatus(ctx context.Context, merchantId [32]byte) (uint8, error) {
+	// Validate inputs
+	if err := utils.ValidateMerchantId(merchantId); err != nil {
+		return 0, err
+	}
+
 	// Create call options
 	opts := &bind.CallOpts{Context: ctx}
 
@@ -180,6 +211,11 @@ func (m *Merchant) GetMerchantVerificationStatus(ctx context.Context, merchantId
 
 // GetMerchantCreatedAt returns the timestamp when the merchant was registered
 func (m *Merchant) GetMerchantCreatedAt(ctx context.Context, merchantId [32]byte) (*big.Int, error) {
+	// Validate inputs
+	if err := utils.ValidateMerchantId(merchantId); err != nil {
+		return nil, err
+	}
+
 	// Create call options
 	opts := &bind.CallOpts{Context: ctx}
 
@@ -194,6 +230,11 @@ func (m *Merchant) GetMerchantCreatedAt(ctx context.Context, merchantId [32]byte
 
 // GetMerchantTokenBalance gets the merchant's token balance for a specific token
 func (m *Merchant) GetMerchantTokenBalance(ctx context.Context, merchantWalletAddress common.Address, tokenAddress common.Address) (*big.Int, error) {
+	// Validate inputs
+	if err := utils.ValidateMerchatTokenBalanceInputs(merchantWalletAddress, tokenAddress); err != nil {
+		return nil, err
+	}
+
 	// Create call options
 	opts := &bind.CallOpts{Context: ctx}
 

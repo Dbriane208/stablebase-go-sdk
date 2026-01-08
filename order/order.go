@@ -7,6 +7,7 @@ import (
 
 	"github.com/Dbriane208/stablebase-go-sdk/client"
 	"github.com/Dbriane208/stablebase-go-sdk/contracts"
+	"github.com/Dbriane208/stablebase-go-sdk/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -58,6 +59,11 @@ func (o *Order) ApproveToken(ctx context.Context, tokenAddress common.Address, s
 
 // CreateOrder creates a new payment order initiated by the customer
 func (o *Order) CreateOrder(ctx context.Context, merchantID [32]byte, tokenAddress common.Address, amount *big.Int, metadataURI string) (*contracts.PaymentProcessorOrderCreated, [32]byte, *types.Receipt, error) {
+	// Validate inputs
+	if err := utils.ValidateCreateOrderInputs(merchantID, tokenAddress, amount, metadataURI); err != nil {
+		return nil, [32]byte{}, nil, err
+	}
+
 	// Create transaction options
 	auth, err := bind.NewKeyedTransactorWithChainID(o.Client.PrivateKey, o.Client.ChainID)
 	if err != nil {
@@ -95,6 +101,11 @@ func (o *Order) CreateOrder(ctx context.Context, merchantID [32]byte, tokenAddre
 
 // PayOrder executes payment for an order
 func (o *Order) PayOrder(ctx context.Context, orderId [32]byte) (*contracts.PaymentProcessorOrderPaid, *types.Receipt, error) {
+	// Validate input
+	if err := utils.ValidateOrderId(orderId); err != nil {
+		return nil, nil, err
+	}
+
 	// Create transaction options
 	auth, err := bind.NewKeyedTransactorWithChainID(o.Client.PrivateKey, o.Client.ChainID)
 	if err != nil {
@@ -133,6 +144,11 @@ func (o *Order) PayOrder(ctx context.Context, orderId [32]byte) (*contracts.Paym
 
 // Cancel Order allows payer to cancel an order
 func (o *Order) CancelOrder(ctx context.Context, orderId [32]byte) (*contracts.PaymentProcessorOrderCancelled, *types.Receipt, error) {
+	// Validate input
+	if err := utils.ValidateOrderId(orderId); err != nil {
+		return nil, nil, err
+	}
+
 	// Create transaction options
 	auth, err := bind.NewKeyedTransactorWithChainID(o.Client.PrivateKey, o.Client.ChainID)
 	if err != nil {
@@ -170,6 +186,11 @@ func (o *Order) CancelOrder(ctx context.Context, orderId [32]byte) (*contracts.P
 
 // GetOrder retrieves Order information from the blockchain
 func (o *Order) GetOrder(ctx context.Context, orderId [32]byte) (*contracts.IPaymentProcessorOrder, error) {
+	// Validate input
+	if err := utils.ValidateOrderId(orderId); err != nil {
+		return nil, err
+	}
+
 	// Create call options (read-only, no transaction)
 	opts := &bind.CallOpts{Context: ctx}
 
@@ -184,6 +205,11 @@ func (o *Order) GetOrder(ctx context.Context, orderId [32]byte) (*contracts.IPay
 
 // GetOrderStatus gets the status of the order
 func (o *Order) GetOrderStatus(ctx context.Context, orderId [32]byte) (uint8, error) {
+	// Validate input
+	if err := utils.ValidateOrderId(orderId); err != nil {
+		return 0, err
+	}
+
 	// Create call options
 	opts := &bind.CallOpts{Context: ctx}
 
@@ -198,6 +224,11 @@ func (o *Order) GetOrderStatus(ctx context.Context, orderId [32]byte) (uint8, er
 
 // IsOrderExpired checks if an order has expired
 func (o *Order) IsOrderExpired(ctx context.Context, orderId [32]byte) (bool, error) {
+	// Validate input
+	if err := utils.ValidateOrderId(orderId); err != nil {
+		return false, err
+	}
+
 	// Create call options
 	opts := &bind.CallOpts{Context: ctx}
 
@@ -212,6 +243,11 @@ func (o *Order) IsOrderExpired(ctx context.Context, orderId [32]byte) (bool, err
 
 // GetOrderCreatedAt check when the order was created
 func (o *Order) GetOrderCreatedAt(ctx context.Context, orderId [32]byte) (*big.Int, error) {
+	// Validate input
+	if err := utils.ValidateOrderId(orderId); err != nil {
+		return nil, err
+	}
+
 	// Create call options
 	opts := &bind.CallOpts{Context: ctx}
 
@@ -226,6 +262,11 @@ func (o *Order) GetOrderCreatedAt(ctx context.Context, orderId [32]byte) (*big.I
 
 // GetOrderRemainingTime gets remaining time before order expires
 func (o *Order) GetOrderRemainingTime(ctx context.Context, orderId [32]byte) (*big.Int, error) {
+	// Validate input
+	if err := utils.ValidateOrderId(orderId); err != nil {
+		return nil, err
+	}
+
 	// Create call options
 	opts := &bind.CallOpts{Context: ctx}
 
