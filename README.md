@@ -5,6 +5,12 @@ A Go SDK for interacting with StableBase payment smart contracts on EVM-compatib
 [![Go Reference](https://pkg.go.dev/badge/github.com/Dbriane208/stablebase-go-sdk.svg)](https://pkg.go.dev/github.com/Dbriane208/stablebase-go-sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+> [!NOTE] > **📚 Learning Project Disclaimer**
+>
+> This SDK is a **passion project** built out of curiosity to understand how stablecoin payment infrastructure works on the blockchain. It was created purely for **educational and learning purposes** to explore the Web3 ecosystem.
+>
+> ⚠️ **This project is NOT intended for commercial or production use.** It has not been audited and may contain bugs or security vulnerabilities. Use it to learn, experiment, and understand the concepts—but please do not deploy it in real-world financial applications.
+
 ---
 
 ## 📚 Table of Contents
