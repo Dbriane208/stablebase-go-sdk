@@ -19,6 +19,7 @@ A Go SDK for interacting with StableBase payment smart contracts on EVM-compatib
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [SDK Architecture](#sdk-architecture)
+- [Methods Quick Reference](#methods-quick-reference)
 - [Network Configuration](#network-configuration)
 - [API Reference](#api-reference)
   - [Client](#client)
@@ -147,6 +148,52 @@ stablebase-go-sdk/
 
 ---
 
+## Methods Quick Reference
+
+### Merchant Methods (8 total)
+
+| Method                                                       | Description                   |
+| ------------------------------------------------------------ | ----------------------------- |
+| `RegisterMerchant(ctx, payoutWallet, metadataURI)`           | Register a new merchant       |
+| `UpdateMerchant(ctx, merchantId, payoutWallet, metadataURI)` | Update merchant details       |
+| `RefundOrder(ctx, orderId)`                                  | Refund order to customer      |
+| `GetMerchantInfo(ctx, merchantId)`                           | Get merchant information      |
+| `IsMerchantVerified(ctx, merchantId)`                        | Check if merchant is verified |
+| `GetMerchantVerificationStatus(ctx, merchantId)`             | Get verification status code  |
+| `GetMerchantCreatedAt(ctx, merchantId)`                      | Get registration timestamp    |
+| `GetMerchantTokenBalance(ctx, walletAddress, tokenAddress)`  | Get token balance             |
+
+### Order Methods (9 total)
+
+| Method                                                            | Description               |
+| ----------------------------------------------------------------- | ------------------------- |
+| `ApproveToken(ctx, tokenAddress, spenderAddress, amount)`         | Approve token spending    |
+| `CreateOrder(ctx, merchantId, tokenAddress, amount, metadataURI)` | Create payment order      |
+| `PayOrder(ctx, orderId)`                                          | Pay for an order          |
+| `CancelOrder(ctx, orderId)`                                       | Cancel unpaid order       |
+| `GetOrder(ctx, orderId)`                                          | Get order details         |
+| `GetOrderStatus(ctx, orderId)`                                    | Get order status code     |
+| `IsOrderExpired(ctx, orderId)`                                    | Check if order expired    |
+| `GetOrderCreatedAt(ctx, orderId)`                                 | Get creation timestamp    |
+| `GetOrderRemainingTime(ctx, orderId)`                             | Get time until expiration |
+
+### Platform Methods (10 total)
+
+| Method                                                          | Description                     |
+| --------------------------------------------------------------- | ------------------------------- |
+| `SettleOrder(ctx, orderId)`                                     | Settle order (distribute funds) |
+| `RefundOrder(ctx, orderId)`                                     | Refund order to customer        |
+| `EmergencyWithdraw(ctx, tokenAddress, receiverAddress, amount)` | Emergency fund withdrawal       |
+| `SetEmergencyWithdrawalEnabled(ctx, enable)`                    | Toggle emergency withdrawals    |
+| `UpdateMerchantRegistry(ctx, newRegistryAddress)`               | Update registry contract        |
+| `SetTokenSupport(ctx, tokenAddress, status)`                    | Enable/disable token support    |
+| `UpdateProtocolAddress(ctx, what, newAddress)`                  | Update protocol addresses       |
+| `UpdateOrderExpirationTime(ctx, newExpirationTime)`             | Set order expiration duration   |
+| `GetPlatformTokenBalance(ctx, walletAddress, tokenAddress)`     | Get platform token balance      |
+| `GetContractTokenBalance(ctx, tokenAddress)`                    | Get contract token balance      |
+
+---
+
 ## Network Configuration
 
 ### Supported Networks
@@ -244,6 +291,21 @@ import "github.com/Dbriane208/stablebase-go-sdk/merchant"
 // Create merchant instance
 m := merchant.New(c) // 'c' is your client
 ```
+
+#### Available Methods
+
+| Method                          | Type  | Description                                                              |
+| ------------------------------- | ----- | ------------------------------------------------------------------------ |
+| `RegisterMerchant`              | Write | Register a new merchant on the blockchain                                |
+| `UpdateMerchant`                | Write | Update merchant payout wallet or metadata                                |
+| `RefundOrder`                   | Write | Refund a paid order back to customer                                     |
+| `GetMerchantInfo`               | Read  | Get full merchant information                                            |
+| `IsMerchantVerified`            | Read  | Check if merchant is verified (bool)                                     |
+| `GetMerchantVerificationStatus` | Read  | Get verification status (0=Pending, 1=Verified, 2=Rejected, 3=Suspended) |
+| `GetMerchantCreatedAt`          | Read  | Get merchant registration timestamp                                      |
+| `GetMerchantTokenBalance`       | Read  | Get merchant's token balance                                             |
+
+---
 
 #### Register a Merchant
 
@@ -367,6 +429,22 @@ import "github.com/Dbriane208/stablebase-go-sdk/order"
 // Create order instance
 o := order.New(c) // 'c' is your client
 ```
+
+#### Available Methods
+
+| Method                  | Type  | Description                                                                         |
+| ----------------------- | ----- | ----------------------------------------------------------------------------------- |
+| `ApproveToken`          | Write | Approve PaymentProcessor to spend your tokens                                       |
+| `CreateOrder`           | Write | Create a new payment order for a merchant                                           |
+| `PayOrder`              | Write | Execute payment for a created order                                                 |
+| `CancelOrder`           | Write | Cancel an unpaid order                                                              |
+| `GetOrder`              | Read  | Get full order information                                                          |
+| `GetOrderStatus`        | Read  | Get order status (0=Created, 1=Paid, 2=Settled, 3=Cancelled, 4=Refunded, 5=Expired) |
+| `IsOrderExpired`        | Read  | Check if order has expired (bool)                                                   |
+| `GetOrderCreatedAt`     | Read  | Get order creation timestamp                                                        |
+| `GetOrderRemainingTime` | Read  | Get remaining time before order expires                                             |
+
+---
 
 #### Complete Payment Flow Example
 
@@ -515,6 +593,23 @@ import "github.com/Dbriane208/stablebase-go-sdk/platform"
 
 p := platform.New(c)
 ```
+
+#### Available Methods
+
+| Method                          | Type  | Description                                                  |
+| ------------------------------- | ----- | ------------------------------------------------------------ |
+| `SettleOrder`                   | Write | Distribute funds from paid order (98% merchant, 2% platform) |
+| `RefundOrder`                   | Write | Refund a paid order back to customer                         |
+| `EmergencyWithdraw`             | Write | Withdraw funds from contract in emergency                    |
+| `SetEmergencyWithdrawalEnabled` | Write | Enable/disable emergency withdrawal functionality            |
+| `UpdateMerchantRegistry`        | Write | Update merchant registry contract address                    |
+| `SetTokenSupport`               | Write | Enable/disable support for a token                           |
+| `UpdateProtocolAddress`         | Write | Update protocol address (fee receiver, treasury, etc.)       |
+| `UpdateOrderExpirationTime`     | Write | Change order expiration duration                             |
+| `GetPlatformTokenBalance`       | Read  | Get platform wallet's token balance                          |
+| `GetContractTokenBalance`       | Read  | Get PaymentProcessor contract's token balance                |
+
+---
 
 #### Settle Order
 
