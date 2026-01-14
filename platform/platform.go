@@ -105,6 +105,54 @@ func (p *Platform) RefundOrder(ctx context.Context, orderId [32]byte) (*contract
 	return nil, receipt, fmt.Errorf("refund succeeded but event not found in logs")
 }
 
+// UpdateMerchantVerificationStatus updates the verification status of a merchant
+// Status values: 0=Pending, 1=Verified, 2=Rejected, 3=Suspended
+func (p *Platform) UpdateMerchantVerificationStatus(ctx context.Context, merchantId [32]byte, newStatus uint8) (*contracts.MerchantRegistryMerchantVerificationStatusUpdated, *types.Receipt, error) {
+	// Validate inputs
+	if err := utils.ValidateMerchantId(merchantId); err != nil {
+		return nil, nil, err
+	}
+
+	// Validate status (0=Pending, 1=Verified, 2=Rejected, 3=Suspended)
+	if newStatus > 3 {
+		return nil, nil, fmt.Errorf("invalid verification status: %d (must be 0-3)", newStatus)
+	}
+
+	// Create transaction options
+	auth, err := bind.NewKeyedTransactorWithChainID(p.Client.PrivateKey, p.Client.ChainID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Call the contract
+	tx, err := p.Client.MerchantRegistry.UpdateMerchantVerificationStatus(auth, merchantId, newStatus)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Wait for the transaction to be mined
+	receipt, err := bind.WaitMined(ctx, p.Client.EthClient, tx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Check if transaction succeeded
+	if receipt.Status == 0 {
+		return nil, receipt, fmt.Errorf("update merchant verification status transaction failed: %s", tx.Hash().Hex())
+	}
+
+	// Parse the MerchantVerificationStatusUpdated event
+	for _, log := range receipt.Logs {
+		event, err := p.Client.MerchantRegistry.ParseMerchantVerificationStatusUpdated(*log)
+		if err == nil {
+			return event, receipt, nil
+		}
+	}
+
+	// If no event found, still return success but with warning
+	return nil, receipt, fmt.Errorf("update merchant verification status succeeded but event not found in logs")
+}
+
 // EmergencyWithdraw allows platform admin to withdraw funds from the contract in emergency situations
 func (p *Platform) EmergencyWithdraw(ctx context.Context, tokenAddress common.Address, receiverAddress common.Address, amount *big.Int) (*contracts.PaymentProcessorEmergencyWithdrawalSuccess, *types.Receipt, error) {
 	// Validate inputs
